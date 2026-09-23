@@ -5,7 +5,8 @@ class SessionsController < ApplicationController
   # A tight per-IP limit alone locked out everyone behind one address: an office NAT, or the E2E
   # suite signing in a session per worker and role.
   rate_limit to: 10, within: 1.minute, only: :create, name: "per-email", by: -> { params[:email].to_s.strip.downcase }, with: TOO_MANY
-  rate_limit to: 100, within: 1.minute, only: :create, name: "per-ip", with: TOO_MANY
+  # UAT raises the per-IP limit: every parallel runner of a CI job signs in from the same address.
+  rate_limit to: Integer(ENV.fetch("SIGN_IN_LIMIT_PER_IP", 100)), within: 1.minute, only: :create, name: "per-ip", with: TOO_MANY
 
   def new
     redirect_to org_dashboard_path if current_user

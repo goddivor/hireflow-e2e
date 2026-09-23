@@ -13,6 +13,7 @@ services:
       SMTP_PORT: "1025"
       SMS_GATEWAY_URL: http://sms-sink:8026
       DATABASE_PATH: /rails/storage/uat.sqlite3
+      SIGN_IN_LIMIT_PER_IP: "5000"
     depends_on:
       - mailpit
       - sms-sink
