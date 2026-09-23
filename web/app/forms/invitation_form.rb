@@ -16,7 +16,7 @@ class InvitationForm
     template = organization.interview_templates.find_by(id: interview_template_id)
     return errors.add(:interview_template_id, "is not one of your templates") && nil unless template
 
-    ActiveRecord::Base.transaction do
+    invitation, magic_link = ActiveRecord::Base.transaction do
       candidate = organization.users.find_or_initialize_by(email: email.strip.downcase)
       if candidate.persisted? && !candidate.candidate?
         errors.add(:email, "belongs to a team member")
@@ -30,8 +30,13 @@ class InvitationForm
       end
 
       invitation = organization.invitations.create!(interview_template: template, candidate:, invited_by:)
-      UserMailer.interview_invitation(candidate.magic_links.create!(invitation:)).deliver_later
-      invitation
+      [invitation, candidate.magic_links.create!(invitation:)]
     end
+    return unless invitation
+
+    # Enqueued after the commit: from inside the transaction, the background job could run first and
+    # fail to find the magic link, and the candidate never got the email.
+    UserMailer.interview_invitation(magic_link).deliver_later
+    invitation
   end
 end
