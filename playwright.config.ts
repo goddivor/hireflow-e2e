@@ -1,31 +1,35 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = Number(process.env.E2E_PORT ?? 3100);
-export const BASE_URL = `http://localhost:${PORT}`;
+// One id per run, inherited by every worker and shard, so tenants from concurrent runs against the
+// same UAT database never collide. CI sets it to the workflow run id.
+process.env.E2E_RUN_ID ??= Date.now().toString(36);
 
 export default defineConfig({
-  testDir: "./e2e",
+  testDir: "./e2e/tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
+  timeout: 30_000,
+  expect: { timeout: 5_000 },
   reporter: process.env.CI ? [["blob"], ["github"]] : [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: BASE_URL,
+    baseURL: process.env.BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
+    video: process.env.E2E_VIDEO === "on" ? { mode: "on", size: { width: 1280, height: 720 } } : "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: {
-    // A throwaway database per run: the suite never depends on leftovers from a previous one.
-    command: "rm -f data/e2e.db* && tsx src/server.ts",
-    url: `${BASE_URL}/health`,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      PORT: String(PORT),
-      APP_URL: BASE_URL,
-      DATABASE_PATH: "data/e2e.db",
-      ENABLE_TEST_API: "1",
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          // Chrome's fake capture devices: a synthetic camera pattern and a beeping microphone,
+          // with the permission prompt auto-accepted, so the interview flow runs headless in CI.
+          args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+        },
+      },
     },
-  },
+  ],
 });
