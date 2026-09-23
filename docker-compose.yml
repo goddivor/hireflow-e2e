@@ -1,8 +1,34 @@
-# Local SMTP catcher: the app sends every email here, the E2E suite reads them
-# back through the Mailpit REST API. Nothing ever leaves the machine.
+# The UAT stack the E2E suite runs against: the Rails app, a local SMTP catcher (Mailpit) and a local
+# SMS sink. Emails and texts never leave the machine; the suite reads both back over HTTP.
 services:
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      APP_HOST: localhost:3000
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-uat-only-not-a-secret-000000000000000000000000000000000000000000000}
+      SEED_TOKEN: ${SEED_TOKEN:-local-seed-token}
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMS_GATEWAY_URL: http://sms-sink:8026
+      DATABASE_PATH: /rails/storage/uat.sqlite3
+    depends_on:
+      - mailpit
+      - sms-sink
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/up"]
+      interval: 2s
+      timeout: 2s
+      retries: 60
+
   mailpit:
     image: axllent/mailpit:latest
     ports:
-      - "1025:1025" # SMTP
-      - "8025:8025" # web UI + REST API
+      - "1025:1025"
+      - "8025:8025"
+
+  sms-sink:
+    build: ./sms-sink
+    ports:
+      - "8026:8026"
