@@ -1,0 +1,93 @@
+<% content_for :title, @invitation.interview_template.title %>
+<h1><%= @invitation.interview_template.title %></h1>
+
+<section aria-labelledby="device-check">
+  <h2 id="device-check">Camera and microphone</h2>
+  <p id="device-status" role="status">Your camera is off.</p>
+  <video id="preview" autoplay muted playsinline aria-label="Camera preview"></video>
+  <p><button type="button" id="enable-devices">Turn on camera and microphone</button></p>
+</section>
+
+<section aria-labelledby="questions-heading">
+  <h2 id="questions-heading">Questions</h2>
+  <ol>
+    <% answered = @invitation.answers.pluck(:question_index) %>
+    <% @invitation.questions.each_with_index do |question, i| %>
+      <li class="question" data-index="<%= i %>">
+        <p><%= question %></p>
+        <button type="button" data-action="record" aria-label="Record answer <%= i + 1 %>" disabled>Record</button>
+        <button type="button" data-action="stop" aria-label="Stop answer <%= i + 1 %>" disabled>Stop</button>
+        <span role="status" aria-label="Answer <%= i + 1 %> status"><%= answered.include?(i) ? "Answer saved" : "Not recorded" %></span>
+      </li>
+    <% end %>
+  </ol>
+</section>
+
+<%= button_to "Submit interview", submit_org_interview_path(id: @invitation), id: "submit-interview", disabled: !@invitation.all_answered? %>
+
+<script>
+  (() => {
+    const answersUrl = "<%= org_interview_answers_path(interview_id: @invitation) %>";
+    const csrfToken = document.querySelector("meta[name=csrf-token]").content;
+    const status = document.getElementById("device-status");
+    const submit = document.getElementById("submit-interview");
+    let stream;
+
+    document.getElementById("enable-devices").addEventListener("click", async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch (error) {
+        status.textContent = `Camera or microphone blocked: ${error.name}. Allow access in your browser settings.`;
+        return;
+      }
+      document.getElementById("preview").srcObject = stream;
+      const [video] = stream.getVideoTracks();
+      const [audio] = stream.getAudioTracks();
+      status.textContent = `Camera and microphone ready (${video.label || "camera"}, ${audio.label || "microphone"}).`;
+      document.querySelectorAll("[data-action=record]").forEach((button) => (button.disabled = false));
+    });
+
+    document.querySelectorAll(".question").forEach((question) => {
+      const record = question.querySelector("[data-action=record]");
+      const stop = question.querySelector("[data-action=stop]");
+      const label = question.querySelector("[role=status]");
+      let recorder, chunks, startedAt;
+
+      record.addEventListener("click", () => {
+        chunks = [];
+        recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data);
+        recorder.onstop = () => upload(new Blob(chunks, { type: recorder.mimeType }), Date.now() - startedAt);
+        // A timeslice makes the browser hand over data while recording, so even a short answer is never empty.
+        recorder.start(250);
+        startedAt = Date.now();
+        record.disabled = true;
+        stop.disabled = false;
+        label.textContent = "Recording…";
+      });
+
+      stop.addEventListener("click", () => {
+        stop.disabled = true;
+        label.textContent = "Uploading…";
+        recorder.stop();
+      });
+
+      async function upload(blob, durationMs) {
+        const body = new FormData();
+        body.append("recording", blob, `answer-${question.dataset.index}.webm`);
+        body.append("question_index", question.dataset.index);
+        body.append("duration_ms", String(durationMs));
+        const response = await fetch(answersUrl, { method: "POST", body, headers: { "X-CSRF-Token": csrfToken } });
+        if (!response.ok) {
+          label.textContent = "Upload failed. Record again.";
+          record.disabled = false;
+          return;
+        }
+        const result = await response.json();
+        label.textContent = "Answer saved";
+        record.disabled = false;
+        submit.disabled = !result.all_answered;
+      }
+    });
+  })();
+</script>

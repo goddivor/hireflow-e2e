@@ -1,0 +1,18 @@
+<% content_for :title, "My interviews" %>
+<h1>My interviews</h1>
+<% if @invitations.any? %>
+  <table aria-label="My interviews">
+    <thead><tr><th scope="col">Interview</th><th scope="col">Status</th><th scope="col"><span class="muted">Action</span></th></tr></thead>
+    <tbody>
+      <% @invitations.each do |invitation| %>
+        <tr>
+          <td><%= invitation.interview_template.title %></td>
+          <td><%= invitation.status.capitalize %></td>
+          <td><%= link_to "Open #{invitation.interview_template.title}", org_interview_path(id: invitation) unless invitation.status == "completed" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>You have no interviews yet.</p>
+<% end %>
