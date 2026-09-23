@@ -1,10 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import { test as base, type Page } from "@playwright/test";
+import { test as base, type BrowserContext, type Page } from "@playwright/test";
 import { env } from "../support/env";
 import { MailosaurInbox, MailpitInbox, SmsInbox, type MailInbox } from "../support/inbox";
 import { SeedApi, type Role, type Tenant } from "../support/seed";
 import { signInOverHttp } from "./sessions";
+
+const recordVideo = process.env.E2E_VIDEO === "on";
+const VIDEO_SIZE = { width: 1280, height: 720 };
 
 type WorkerFixtures = {
   tenant: Tenant;
@@ -14,8 +17,11 @@ type WorkerFixtures = {
 type TestFixtures = {
   /** Who `page` is signed in as. Unset means a guest. Set per file or describe with `test.use({ role })`. */
   role: Role | undefined;
-  /** Opens an extra page signed in as another role of the same tenant, for flows that cross roles. */
-  pageAs: (role: Role) => Promise<Page>;
+  /**
+   * Opens another person's page, in its own browser context: a role of the same tenant, or
+   * "guest" for someone with no session yet, such as a candidate opening their invitation.
+   */
+  pageAs: (who: Role | "guest") => Promise<Page>;
   /** Builds a path inside the worker's tenant: `org("/templates")` → `/o/<slug>/templates`. */
   org: (subpath?: string) => string;
   seed: SeedApi;
@@ -61,17 +67,23 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   },
 
   pageAs: async ({ browser, storageStates }, use, testInfo) => {
-    const contexts: Awaited<ReturnType<typeof browser.newContext>>[] = [];
-    await use(async (role) => {
+    const contexts: BrowserContext[] = [];
+    const videoStarts: Record<string, number> = {};
+    await use(async (who) => {
+      const name = `${contexts.length + 1}-${who}`;
       const context = await browser.newContext({
         baseURL: testInfo.project.use.baseURL,
-        storageState: storageStates[role],
-        ...(process.env.E2E_VIDEO === "on" ? { recordVideo: { dir: testInfo.outputPath(`video-${role}`), size: { width: 1280, height: 720 } } } : {}),
+        storageState: who === "guest" ? undefined : storageStates[who],
+        permissions: ["camera", "microphone"],
+        ...(recordVideo ? { recordVideo: { dir: testInfo.outputPath(`video-${name}`), size: VIDEO_SIZE } } : {}),
       });
+      videoStarts[name] = Date.now();
       contexts.push(context);
       return context.newPage();
     });
     await Promise.all(contexts.map((context) => context.close()));
+    // scripts/demo-gif.sh lines the videos up on a shared clock with these start times.
+    if (recordVideo) fs.writeFileSync(testInfo.outputPath("video-starts.json"), JSON.stringify(videoStarts));
   },
 
   org: async ({ tenant }, use) => {

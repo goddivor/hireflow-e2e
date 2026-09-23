@@ -5,7 +5,7 @@ import { extractCode, extractLink } from "../../support/inbox";
 test.use({ role: "recruiter" });
 
 test.describe("inviting a candidate", () => {
-  test("the candidate follows the emailed link and confirms the texted code", async ({ page, org, seed, tenant, mail, sms, browser }) => {
+  test("the candidate follows the emailed link and confirms the texted code", async ({ page, org, seed, tenant, mail, sms, pageAs }) => {
     const template = await seed.record<{ title: string }>(tenant.slug, "interview_template", {
       attributes: { title: unique.name("Support Engineer") },
     });
@@ -23,8 +23,7 @@ test.describe("inviting a candidate", () => {
     const invitation = await mail.latest(candidate.email, /invited you to an interview/);
     expect(invitation.text).toContain(`"${template.title}" interview`);
 
-    const context = await browser.newContext({ baseURL: test.info().project.use.baseURL });
-    const candidatePage = await context.newPage();
+    const candidatePage = await pageAs("guest");
     await candidatePage.goto(extractLink(invitation.text, "/magic/"));
     await expect(candidatePage.getByRole("heading", { name: "Confirm your phone" })).toBeVisible();
     await expect(candidatePage.getByText(`ending in ${candidate.phone.slice(-4)}`)).toBeVisible();
@@ -34,7 +33,6 @@ test.describe("inviting a candidate", () => {
     await candidatePage.getByRole("button", { name: "Confirm" }).click();
 
     await expect(candidatePage.getByRole("heading", { name: template.title })).toBeVisible();
-    await context.close();
 
     await page.reload();
     await expect(page.getByRole("row", { name: candidate.name })).toContainText("Opened");

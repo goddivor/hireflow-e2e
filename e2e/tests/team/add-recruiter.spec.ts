@@ -5,7 +5,7 @@ import { extractLink } from "../../support/inbox";
 test.use({ role: "admin" });
 
 test.describe("team", () => {
-  test("an admin adds a recruiter, who signs in from the welcome email", async ({ page, org, mail, browser }) => {
+  test("an admin adds a recruiter, who signs in from the welcome email", async ({ page, org, mail, pageAs }) => {
     const name = unique.name("Riley Recruiter");
     const email = unique.email("recruiter");
 
@@ -18,12 +18,9 @@ test.describe("team", () => {
     await expect(page.getByRole("row", { name: `${name} ${email} recruiter` })).toBeVisible();
 
     const welcome = await mail.latest(email, /added to/);
-    // A fresh context: the new recruiter is someone else, on another machine, with no session.
-    const context = await browser.newContext({ baseURL: test.info().project.use.baseURL });
-    const recruiterPage = await context.newPage();
-    await recruiterPage.goto(extractLink(welcome.text, "/magic/"));
-    await expect(recruiterPage.getByTestId("current-user")).toHaveText(`${name} (recruiter)`);
-    await context.close();
+    const newRecruiter = await pageAs("guest");
+    await newRecruiter.goto(extractLink(welcome.text, "/magic/"));
+    await expect(newRecruiter.getByTestId("current-user")).toHaveText(`${name} (recruiter)`);
   });
 
   test("an email already on the team is refused", async ({ page, org, tenant }) => {
