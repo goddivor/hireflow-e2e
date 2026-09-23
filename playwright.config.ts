@@ -28,6 +28,8 @@ export default defineConfig({
           // Chrome's fake capture devices: a synthetic camera pattern and a beeping microphone,
           // with the permission prompt auto-accepted, so the interview flow runs headless in CI.
           args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"],
+          // Only for recording the README demo: a pause between actions so a viewer can follow.
+          slowMo: Number(process.env.E2E_SLOWMO ?? 0),
         },
       },
     },
