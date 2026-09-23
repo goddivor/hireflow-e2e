@@ -1,0 +1,34 @@
+{
+  "name": "taskflow-e2e",
+  "version": "1.0.0",
+  "description": "A small task app and the Playwright suite that tests it: per-worker logged-in sessions, email verification, sharded CI.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc",
+    "mail:up": "docker compose up -d mailpit",
+    "mail:down": "docker compose down",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemailer": "^10.0.10"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.2",
+    "@types/nodemailer": "^8.0.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

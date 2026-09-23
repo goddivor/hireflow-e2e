@@ -1,0 +1,8 @@
+# Local SMTP catcher: the app sends every email here, the E2E suite reads them
+# back through the Mailpit REST API. Nothing ever leaves the machine.
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web UI + REST API
