@@ -56,14 +56,21 @@
       record.addEventListener("click", () => {
         chunks = [];
         recorder = new MediaRecorder(stream);
-        recorder.ondataavailable = (event) => event.data.size && chunks.push(event.data);
+        // Stop is offered only once the first chunk exists. Stopping earlier produced an empty file,
+        // which the server rightly refused: a quick click lost the answer.
+        recorder.ondataavailable = (event) => {
+          if (!event.data.size) return;
+          chunks.push(event.data);
+          if (chunks.length === 1) {
+            stop.disabled = false;
+            label.textContent = "Recording…";
+          }
+        };
         recorder.onstop = () => upload(new Blob(chunks, { type: recorder.mimeType }), Date.now() - startedAt);
-        // A timeslice makes the browser hand over data while recording, so even a short answer is never empty.
         recorder.start(250);
         startedAt = Date.now();
         record.disabled = true;
-        stop.disabled = false;
-        label.textContent = "Recording…";
+        label.textContent = "Starting…";
       });
 
       stop.addEventListener("click", () => {
