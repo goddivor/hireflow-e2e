@@ -1,0 +1,7 @@
+<% content_for :title, "Confirm your phone" %>
+<h1>Confirm your phone</h1>
+<p>We texted a 6-digit code to the number ending in <strong><%= @pending_user.phone.last(4) %></strong>.</p>
+<%= form_with url: org_verify_phone_path, class: "stack" do |f| %>
+  <%= f.label :code do %>Code from the text message <%= f.text_field :code, inputmode: "numeric", autocomplete: "one-time-code", required: true %><% end %>
+  <%= f.submit "Confirm" %>
+<% end %>
