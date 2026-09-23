@@ -52,9 +52,7 @@
       }
       document.getElementById("preview").srcObject = stream;
       document.getElementById("enable-devices").hidden = true;
-      const [video] = stream.getVideoTracks();
-      const [audio] = stream.getAudioTracks();
-      status.textContent = `Camera and microphone ready (${video.label || "camera"}, ${audio.label || "microphone"}).`;
+      status.textContent = "Camera and microphone ready.";
       document.querySelectorAll("[data-action=record]").forEach((button) => (button.disabled = false));
     });
 

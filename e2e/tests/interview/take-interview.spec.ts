@@ -16,9 +16,15 @@ test.describe("taking an interview", () => {
     await expect(page.getByRole("button", { name: "Submit interview" })).toBeDisabled();
 
     await page.getByRole("button", { name: "Turn on camera and microphone" }).click();
-    await expect(page.getByRole("status", { name: "Device status" })).toHaveText(/^Camera and microphone ready \(fake_device_0.*\)\.$/);
+    await expect(page.getByRole("status", { name: "Device status" })).toHaveText("Camera and microphone ready.");
+    const preview = page.getByLabel("Camera preview");
+    // The preview plays Chrome's fake devices, not whatever the machine has: proof the flags took effect.
+    const tracks = await preview.evaluate((video: HTMLVideoElement) =>
+      (video.srcObject as MediaStream).getTracks().map((track) => `${track.kind}: ${track.label}`),
+    );
+    expect(tracks).toEqual(expect.arrayContaining([expect.stringMatching(/^video: fake_device_0/), expect.stringMatching(/^audio: Fake/)]));
     // The fake camera paints real frames: the preview has a size only once video is flowing.
-    await expect.poll(() => page.getByLabel("Camera preview").evaluate((video: HTMLVideoElement) => video.videoWidth)).toBeGreaterThan(0);
+    await expect.poll(() => preview.evaluate((video: HTMLVideoElement) => video.videoWidth)).toBeGreaterThan(0);
 
     for (const n of [1, 2]) {
       await page.getByRole("button", { name: `Record answer ${n}` }).click();
