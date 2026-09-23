@@ -34,7 +34,9 @@ test.describe("template editor", () => {
 
     await expect(page.getByRole("status")).toHaveText(`Template "${template.title}" was updated.`);
     await page.getByRole("link", { name: `Edit ${template.title}` }).click();
-    await expect(page.getByRole("textbox", { name: /^Question \d$/ })).toHaveValues(["Third", "Second"]);
+    await expect(page.getByLabel("Question 1", { exact: true })).toHaveValue("Third");
+    await expect(page.getByLabel("Question 2", { exact: true })).toHaveValue("Second");
+    await expect(page.getByLabel("Question 3", { exact: true })).toHaveCount(0);
   });
 
   test("refuses a template without a title or questions", async ({ page, org }) => {
