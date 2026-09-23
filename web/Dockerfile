@@ -5,8 +5,11 @@ RUN apt-get update -qq \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /rails
-ENV BUNDLE_WITHOUT="development:test" \
-    RAILS_ENV="uat"
+# The RSpec image builds with BUNDLE_WITHOUT="" and RAILS_ENV=test.
+ARG BUNDLE_WITHOUT="development:test"
+ARG RAILS_ENV="uat"
+ENV BUNDLE_WITHOUT="${BUNDLE_WITHOUT}" \
+    RAILS_ENV="${RAILS_ENV}"
 
 COPY Gemfile Gemfile.lock ./
 RUN bundle install --jobs 4
