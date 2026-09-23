@@ -1,0 +1,18 @@
+<% content_for :title, "Team" %>
+<h1>Team</h1>
+<table>
+  <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th></tr></thead>
+  <tbody>
+    <% @members.each do |member| %>
+      <tr><td><%= member.name %></td><td><%= member.email %></td><td><%= member.role %></td></tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>Add a recruiter</h2>
+<% if @member.errors.any? %><div role="alert"><%= @member.errors.full_messages.to_sentence %></div><% end %>
+<%= form_with model: @member, url: org_team_members_path, class: "stack" do |f| %>
+  <%= f.label :name do %>Name <%= f.text_field :name, required: true %><% end %>
+  <%= f.label :email do %>Email <%= f.email_field :email, required: true %><% end %>
+  <%= f.submit "Add recruiter" %>
+<% end %>

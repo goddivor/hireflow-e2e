@@ -1,0 +1,9 @@
+<% content_for :title, "Dashboard" %>
+<h1>Dashboard</h1>
+<ul>
+  <li><%= pluralize(@template_count, "interview template") %></li>
+  <% Invitation::STATUSES.each do |status| %>
+    <li><%= @counts.fetch(status, 0) %> <%= status %> invitations</li>
+  <% end %>
+</ul>
+<p><%= link_to "Invite a candidate", new_org_invitation_path, class: "button" %></p>

@@ -1,0 +1,14 @@
+<% content_for :title, "Invite a candidate" %>
+<h1>Invite a candidate</h1>
+<% if @templates.empty? %>
+  <p>Create an <%= link_to "interview template", new_org_interview_template_path %> first.</p>
+<% else %>
+  <% if @form.errors.any? %><div role="alert"><%= @form.errors.full_messages.to_sentence %></div><% end %>
+  <%= form_with model: @form, url: org_invitations_path, class: "stack" do |f| %>
+    <%= f.label :name do %>Candidate name <%= f.text_field :name %><% end %>
+    <%= f.label :email do %>Candidate email <%= f.email_field :email %><% end %>
+    <%= f.label :phone do %>Candidate phone <%= f.telephone_field :phone, placeholder: "+15551234567" %><% end %>
+    <%= f.label :interview_template_id do %>Interview template <%= f.collection_select :interview_template_id, @templates, :id, :title, prompt: "Choose a template" %><% end %>
+    <%= f.submit "Send invitation" %>
+  <% end %>
+<% end %>

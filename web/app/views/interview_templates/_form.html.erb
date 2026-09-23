@@ -1,0 +1,49 @@
+<% if template.errors.any? %><div role="alert"><%= template.errors.full_messages.to_sentence %></div><% end %>
+<%= form_with model: template, url: url, class: "stack", id: "template-form" do |f| %>
+  <%= f.label :title do %>Title <%= f.text_field :title %><% end %>
+  <fieldset>
+    <legend>Questions</legend>
+    <ol id="questions">
+      <% (template.questions.presence || [""]).each_with_index do |question, i| %>
+        <li class="question-row">
+          <input name="interview_template[questions][]" value="<%= question %>" aria-label="Question <%= i + 1 %>">
+          <button type="button" class="secondary" data-action="up" aria-label="Move question <%= i + 1 %> up">↑</button>
+          <button type="button" class="secondary" data-action="remove" aria-label="Remove question <%= i + 1 %>">✕</button>
+        </li>
+      <% end %>
+    </ol>
+    <button type="button" class="secondary" id="add-question">Add question</button>
+  </fieldset>
+  <%= f.submit submit_label %>
+<% end %>
+
+<script>
+  (() => {
+    const list = document.getElementById("questions");
+
+    // Labels follow the visible order, so screen readers and role-based locators stay truthful after a move.
+    const relabel = () => [...list.children].forEach((row, i) => {
+      row.querySelector("input").setAttribute("aria-label", `Question ${i + 1}`);
+      row.querySelector("[data-action=up]").setAttribute("aria-label", `Move question ${i + 1} up`);
+      row.querySelector("[data-action=remove]").setAttribute("aria-label", `Remove question ${i + 1}`);
+    });
+
+    document.getElementById("add-question").addEventListener("click", () => {
+      const row = list.lastElementChild.cloneNode(true);
+      row.querySelector("input").value = "";
+      list.append(row);
+      relabel();
+      row.querySelector("input").focus();
+    });
+
+    list.addEventListener("click", (event) => {
+      const row = event.target.closest("li");
+      switch (event.target.dataset.action) {
+        case "up": if (row.previousElementSibling) list.insertBefore(row, row.previousElementSibling); break;
+        case "remove": if (list.children.length > 1) row.remove(); else row.querySelector("input").value = ""; break;
+        default: return;
+      }
+      relabel();
+    });
+  })();
+</script>

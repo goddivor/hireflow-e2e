@@ -1,0 +1,22 @@
+<% content_for :title, "Templates" %>
+<h1>Interview templates</h1>
+<p><%= link_to "New template", new_org_interview_template_path, class: "button" %></p>
+<% if @templates.any? %>
+  <table aria-label="Interview templates">
+    <thead><tr><th scope="col">Title</th><th scope="col">Questions</th><th scope="col"><span class="muted">Actions</span></th></tr></thead>
+    <tbody>
+      <% @templates.each do |template| %>
+        <tr>
+          <td><%= template.title %></td>
+          <td><%= template.questions.size %></td>
+          <td>
+            <%= link_to "Edit", edit_org_interview_template_path(id: template), "aria-label": "Edit #{template.title}" %>
+            <%= button_to "Delete", org_interview_template_path(id: template), method: :delete, class: "secondary", "aria-label": "Delete #{template.title}", form: { style: "display:inline" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No templates yet.</p>
+<% end %>

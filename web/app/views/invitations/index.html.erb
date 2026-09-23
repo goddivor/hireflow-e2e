@@ -1,0 +1,35 @@
+<% content_for :title, "Invitations" %>
+<h1>Invitations</h1>
+<p><%= link_to "Invite a candidate", new_org_invitation_path, class: "button" %></p>
+
+<%= form_with url: org_invitations_path, method: :get, class: "toolbar", role: "search" do |f| %>
+  <%= hidden_field_tag :sort, @sort %>
+  <%= hidden_field_tag :direction, @direction %>
+  <%= f.label :q do %>Search candidates <%= f.search_field :q, value: params[:q] %><% end %>
+  <%= f.label :status do %>Status <%= f.select :status, [["All statuses", ""]] + Invitation::STATUSES.map { [_1.capitalize, _1] }, selected: params[:status] %><% end %>
+  <%= f.submit "Filter", name: nil %>
+<% end %>
+
+<table aria-label="Invitations">
+  <thead>
+    <tr>
+      <%= sortable_header "Candidate", "candidate" %>
+      <th scope="col">Email</th>
+      <%= sortable_header "Template", "template" %>
+      <%= sortable_header "Status", "status" %>
+      <%= sortable_header "Sent", "sent" %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @invitations.each do |invitation| %>
+      <tr>
+        <td><%= invitation.candidate.name %></td>
+        <td><%= invitation.candidate.email %></td>
+        <td><%= invitation.interview_template.title %></td>
+        <td><%= invitation.status.capitalize %></td>
+        <td><time datetime="<%= invitation.created_at.iso8601 %>"><%= invitation.created_at.to_fs(:short) %></time></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% if @invitations.empty? %><p>No invitations match.</p><% end %>

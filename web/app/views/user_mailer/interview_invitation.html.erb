@@ -1,0 +1,4 @@
+<p>Hello <%= @link.user.name %>,</p>
+<p><%= @invitation.invited_by.name %> invited you to the "<%= @invitation.interview_template.title %>" interview at <%= @invitation.organization.name %>.</p>
+<p><a href="<%= @url %>">Start your interview</a></p>
+<p>The link works once and expires in 7 days. We will text a confirmation code to your phone.</p>

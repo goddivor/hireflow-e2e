@@ -1,0 +1,13 @@
+<% content_for :title, "Sign in" %>
+<h1>Sign in to <%= current_organization.name %></h1>
+<%= form_with url: org_login_path, class: "stack" do |f| %>
+  <%= f.label :email, "Email" do %>Email <%= f.email_field :email, value: params[:email], required: true, autocomplete: "username" %><% end %>
+  <%= f.label :password, "Password" do %>Password <%= f.password_field :password, required: true, autocomplete: "current-password" %><% end %>
+  <%= f.submit "Sign in" %>
+<% end %>
+
+<h2>No password?</h2>
+<%= form_with url: org_sign_in_link_path, class: "stack" do |f| %>
+  <%= f.label :email, for: "link_email" do %>Email for a sign-in link <%= f.email_field :email, id: "link_email", required: true %><% end %>
+  <%= f.submit "Email me a sign-in link", class: "secondary" %>
+<% end %>
