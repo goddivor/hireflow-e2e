@@ -21,6 +21,10 @@
     "typescript": "^7.0.2"
   },
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goddivor/hireflow-e2e.git"
   }
 }
