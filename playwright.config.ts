@@ -15,14 +15,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
-  projects: [
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"], storageState: "e2e/.auth/user.json" },
-      dependencies: ["setup"],
-    },
-  ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     // A throwaway database per run: the suite never depends on leftovers from a previous one.
     command: "rm -f data/e2e.db* && tsx src/server.ts",

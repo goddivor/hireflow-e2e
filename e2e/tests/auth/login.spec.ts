@@ -1,8 +1,6 @@
 import { test, expect } from "../../fixtures";
 import { seedVerifiedUser, uniqueEmail } from "../../support/users";
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
 test.describe("login", () => {
   test("redirects a guest away from the task list", async ({ page }) => {
     await page.goto("/tasks");

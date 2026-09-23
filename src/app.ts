@@ -214,6 +214,13 @@ export function createApp({ db, mailer, baseUrl, enableTestApi = false }: AppOpt
       const user = createUser(email, password, true);
       res.status(201).json({ id: user.id, email: user.email });
     });
+
+    app.post("/__test__/tasks/clear", (req, res) => {
+      const user = findUserByEmail(String((req.body as { email?: string }).email ?? ""));
+      if (!user) return res.status(404).json({ error: "unknown user" });
+      db.prepare("DELETE FROM tasks WHERE user_id = ?").run(user.id);
+      res.status(204).end();
+    });
   }
 
   return app;

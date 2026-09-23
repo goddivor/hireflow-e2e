@@ -2,8 +2,6 @@ import { test, expect } from "../../fixtures";
 import { extractCode } from "../../support/mailpit";
 import { PASSWORD, uniqueEmail } from "../../support/users";
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
 test.describe("signup with email verification", () => {
   test("verifies the account with the code sent by email", async ({ page, mailpit }) => {
     const email = uniqueEmail("signup");

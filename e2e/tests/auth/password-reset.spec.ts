@@ -2,8 +2,6 @@ import { test, expect } from "../../fixtures";
 import { extractLink } from "../../support/mailpit";
 import { seedVerifiedUser, uniqueEmail } from "../../support/users";
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
 test.describe("password reset by email link", () => {
   test("follows the emailed link and logs in with the new password", async ({ page, request, mailpit }) => {
     const user = await seedVerifiedUser(request, uniqueEmail("reset"));
