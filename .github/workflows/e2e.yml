@@ -1,0 +1,123 @@
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SHARDS: 4
+  E2E_WORKERS: 3
+
+jobs:
+  rspec:
+    name: RSpec
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the test image
+        run: docker build -t hireflow-web-test --build-arg BUNDLE_WITHOUT="" --build-arg RAILS_ENV=test web
+      - name: Run RSpec
+        run: docker run --rm hireflow-web-test sh -c "bin/rails db:prepare && bundle exec rspec"
+
+  e2e:
+    name: Playwright shard ${{ matrix.shard }}/4
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    env:
+      E2E_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fresh secrets per run, masked in the logs. Against a shared UAT these would come from
+      # repository secrets instead: `SEED_TOKEN: ${{ secrets.UAT_SEED_TOKEN }}`.
+      - name: Generate run secrets
+        run: |
+          seed_token=$(openssl rand -hex 24)
+          secret_key_base=$(openssl rand -hex 64)
+          echo "::add-mask::$seed_token"
+          echo "::add-mask::$secret_key_base"
+          echo "SEED_TOKEN=$seed_token" >> "$GITHUB_ENV"
+          echo "SECRET_KEY_BASE=$secret_key_base" >> "$GITHUB_ENV"
+
+      - name: Start the UAT stack
+        run: docker compose up -d --build --wait
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        id: browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        if: steps.browsers.outputs.cache-hit != 'true'
+      - name: Install Chromium system dependencies
+        run: npx playwright install-deps chromium
+        if: steps.browsers.outputs.cache-hit == 'true'
+
+      - name: Run shard ${{ matrix.shard }}
+        run: npx playwright test --shard=${{ matrix.shard }}/${{ env.SHARDS }}
+
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 7
+
+      - name: Dump app logs
+        if: failure()
+        run: docker compose logs web > web.log
+      - name: Upload app logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-log-${{ matrix.shard }}
+          path: web.log
+
+  report:
+    name: Merge reports
+    if: ${{ !cancelled() }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - name: Merge into an HTML report
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - name: Write the run summary
+        run: |
+          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json npx playwright merge-reports --reporter json ./all-blob-reports
+          node .github/scripts/summary.mjs results.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 14
