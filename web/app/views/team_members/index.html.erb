@@ -1,18 +1,40 @@
 <% content_for :title, "Team" %>
-<h1>Team</h1>
-<table>
-  <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th></tr></thead>
-  <tbody>
-    <% @members.each do |member| %>
-      <tr><td><%= member.name %></td><td><%= member.email %></td><td><%= member.role %></td></tr>
-    <% end %>
-  </tbody>
-</table>
+<div class="page__head">
+  <div>
+    <h1 class="t-h1">Team</h1>
+    <p class="page__sub">Admins and recruiters of <%= current_organization.name %>.</p>
+  </div>
+</div>
+<div class="stack">
+  <div class="card card--flush">
+    <table class="table" aria-label="Team">
+      <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th></tr></thead>
+      <tbody>
+        <% @members.each do |member| %>
+          <tr>
+            <td class="strong"><%= member.name %></td>
+            <td><%= member.email %></td>
+            <td><span class="badge <%= "badge--admin" if member.admin? %>"><%= member.role %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
-<h2>Add a recruiter</h2>
-<% if @member.errors.any? %><div role="alert"><%= @member.errors.full_messages.to_sentence %></div><% end %>
-<%= form_with model: @member, url: org_team_members_path, class: "stack" do |f| %>
-  <%= f.label :name do %>Name <%= f.text_field :name, required: true %><% end %>
-  <%= f.label :email do %>Email <%= f.email_field :email, required: true %><% end %>
-  <%= f.submit "Add recruiter" %>
-<% end %>
+  <section class="card" aria-labelledby="add-recruiter">
+    <h2 class="t-h3 card__title" id="add-recruiter">Add a recruiter</h2>
+    <%= form_with model: @member, url: org_team_members_path, class: "form" do |f| %>
+      <% if @member.errors.any? %><div role="alert" class="flash flash--alert"><%= @member.errors.full_messages.to_sentence %></div><% end %>
+      <div class="field">
+        <%= f.label :name, "Name", class: "field__label" %>
+        <%= f.text_field :name, required: true, class: "input" %>
+      </div>
+      <div class="field">
+        <%= f.label :email, "Email", class: "field__label" %>
+        <%= f.email_field :email, required: true, class: "input" %>
+        <span class="field__hint">They get a single-use sign-in link by email.</span>
+      </div>
+      <div><%= f.submit "Add recruiter", class: "btn btn--primary" %></div>
+    <% end %>
+  </section>
+</div>

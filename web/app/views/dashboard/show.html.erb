@@ -1,9 +1,14 @@
 <% content_for :title, "Dashboard" %>
-<h1>Dashboard</h1>
-<ul>
-  <li><%= pluralize(@template_count, "interview template") %></li>
-  <% Invitation::STATUSES.each do |status| %>
-    <li><%= @counts.fetch(status, 0) %> <%= status %> invitations</li>
-  <% end %>
-</ul>
-<p><%= link_to "Invite a candidate", new_org_invitation_path, class: "button" %></p>
+<div class="page__head">
+  <div>
+    <h1 class="t-h1">Dashboard</h1>
+    <p class="page__sub">Where your interviews stand today.</p>
+  </div>
+  <%= link_to new_org_invitation_path, class: "btn btn--primary" do %><span class="icon icon--sm icon--plus" aria-hidden="true"></span>Invite a candidate<% end %>
+</div>
+<div class="stats">
+  <div class="stat stat--gold"><span class="stat__value"><%= @template_count %></span><span class="stat__label"><%= "interview template".pluralize(@template_count) %></span></div>
+  <div class="stat stat--peach"><span class="stat__value"><%= @counts.fetch("pending", 0) %></span><span class="stat__label">pending</span></div>
+  <div class="stat stat--lilac"><span class="stat__value"><%= @counts.fetch("opened", 0) %></span><span class="stat__label">opened</span></div>
+  <div class="stat stat--lime"><span class="stat__value"><%= @counts.fetch("completed", 0) %></span><span class="stat__label">completed</span></div>
+</div>

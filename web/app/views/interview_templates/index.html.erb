@@ -1,22 +1,29 @@
 <% content_for :title, "Templates" %>
-<h1>Interview templates</h1>
-<p><%= link_to "New template", new_org_interview_template_path, class: "button" %></p>
-<% if @templates.any? %>
-  <table aria-label="Interview templates">
-    <thead><tr><th scope="col">Title</th><th scope="col">Questions</th><th scope="col"><span class="muted">Actions</span></th></tr></thead>
-    <tbody>
-      <% @templates.each do |template| %>
-        <tr>
-          <td><%= template.title %></td>
-          <td><%= template.questions.size %></td>
-          <td>
-            <%= link_to "Edit", edit_org_interview_template_path(id: template), "aria-label": "Edit #{template.title}" %>
-            <%= button_to "Delete", org_interview_template_path(id: template), method: :delete, class: "secondary", "aria-label": "Delete #{template.title}", form: { style: "display:inline" } %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p>No templates yet.</p>
-<% end %>
+<div class="page__head">
+  <div>
+    <h1 class="t-h1">Interview templates</h1>
+    <p class="page__sub">The question sets candidates answer on camera.</p>
+  </div>
+  <%= link_to new_org_interview_template_path, class: "btn btn--primary" do %><span class="icon icon--sm icon--plus" aria-hidden="true"></span>New template<% end %>
+</div>
+<div class="card card--flush">
+  <% if @templates.any? %>
+    <table class="table" aria-label="Interview templates">
+      <thead><tr><th scope="col">Title</th><th scope="col">Questions</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+      <tbody>
+        <% @templates.each do |template| %>
+          <tr>
+            <td class="strong"><%= template.title %></td>
+            <td class="t-mono"><%= template.questions.size %></td>
+            <td class="actions">
+              <%= link_to "Edit", edit_org_interview_template_path(id: template), class: "btn btn--ghost btn--sm", "aria-label": "Edit #{template.title}" %>
+              <%= button_to "Delete", org_interview_template_path(id: template), method: :delete, class: "btn btn--danger-ghost btn--sm", "aria-label": "Delete #{template.title}", form_class: "button-form" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="empty"><span class="empty__art" aria-hidden="true"></span><p>No templates yet.</p></div>
+  <% end %>
+</div>

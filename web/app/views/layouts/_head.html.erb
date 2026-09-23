@@ -1,0 +1,8 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<%= csrf_meta_tags %>
+<% %w[reset fonts tokens app].each do |sheet| %>
+  <link rel="stylesheet" href="/styles/<%= sheet %>.css">
+<% end %>
+<link rel="icon" href="/icons/sparkle.svg" type="image/svg+xml">

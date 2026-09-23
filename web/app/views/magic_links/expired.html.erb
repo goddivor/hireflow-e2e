@@ -1,3 +1,4 @@
 <% content_for :title, "Link expired" %>
-<h1>This link has expired</h1>
-<p>Sign-in links work once and expire after 7 days. <%= link_to "Request a new one", org_login_path %>.</p>
+<h1 class="t-h1 auth__title">This link has expired</h1>
+<p class="auth__sub">Sign-in links work once and expire after 7 days.</p>
+<p style="margin-top: var(--space-8)"><%= link_to "Request a new one", org_login_path, class: "btn btn--primary btn--lg btn--block" %></p>

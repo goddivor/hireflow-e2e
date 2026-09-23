@@ -1,29 +1,39 @@
 <% content_for :title, @invitation.interview_template.title %>
-<h1><%= @invitation.interview_template.title %></h1>
+<div class="page__head">
+  <div>
+    <span class="t-eyebrow"><%= current_organization.name %></span>
+    <h1 class="t-h1"><%= @invitation.interview_template.title %></h1>
+    <p class="page__sub">Turn on your camera, then record one answer per question. You can record an answer again before submitting.</p>
+  </div>
+</div>
 
-<section aria-labelledby="device-check">
-  <h2 id="device-check">Camera and microphone</h2>
-  <p id="device-status" role="status" aria-label="Device status">Your camera is off.</p>
-  <video id="preview" autoplay muted playsinline aria-label="Camera preview"></video>
-  <p><button type="button" id="enable-devices">Turn on camera and microphone</button></p>
-</section>
+<div class="interview">
+  <section class="camera" aria-labelledby="device-check">
+    <h2 class="t-h3" id="device-check" style="color: inherit">Camera and microphone</h2>
+    <video id="preview" autoplay muted playsinline aria-label="Camera preview"></video>
+    <p id="device-status" class="camera__status" role="status" aria-label="Device status">Your camera is off.</p>
+    <button type="button" id="enable-devices" class="btn btn--primary btn--block">Turn on camera and microphone</button>
+  </section>
 
-<section aria-labelledby="questions-heading">
-  <h2 id="questions-heading">Questions</h2>
-  <ol>
-    <% answered = @invitation.answers.pluck(:question_index) %>
-    <% @invitation.questions.each_with_index do |question, i| %>
-      <li class="question" data-index="<%= i %>">
-        <p><%= question %></p>
-        <button type="button" data-action="record" aria-label="Record answer <%= i + 1 %>" disabled>Record</button>
-        <button type="button" data-action="stop" aria-label="Stop answer <%= i + 1 %>" disabled>Stop</button>
-        <span role="status" aria-label="Answer <%= i + 1 %> status"><%= answered.include?(i) ? "Answer saved" : "Not recorded" %></span>
-      </li>
-    <% end %>
-  </ol>
-</section>
-
-<%= button_to "Submit interview", submit_org_interview_path(id: @invitation), id: "submit-interview", disabled: !@invitation.all_answered? %>
+  <section aria-labelledby="questions-heading" class="stack">
+    <h2 id="questions-heading" class="t-h2">Questions</h2>
+    <ol class="answer-list">
+      <% answered = @invitation.answers.pluck(:question_index) %>
+      <% @invitation.questions.each_with_index do |question, i| %>
+        <li class="answer question" data-index="<%= i %>">
+          <span class="t-eyebrow">Question <%= i + 1 %> of <%= @invitation.questions.size %></span>
+          <p class="answer__question"><%= question %></p>
+          <div class="answer__controls">
+            <button type="button" class="btn btn--ink btn--sm" data-action="record" aria-label="Record answer <%= i + 1 %>" disabled>Record</button>
+            <button type="button" class="btn btn--surface btn--sm" data-action="stop" aria-label="Stop answer <%= i + 1 %>" disabled>Stop</button>
+            <span class="answer__status" role="status" aria-label="Answer <%= i + 1 %> status"><%= answered.include?(i) ? "Answer saved" : "Not recorded" %></span>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+    <%= button_to "Submit interview", submit_org_interview_path(id: @invitation), id: "submit-interview", class: "btn btn--primary btn--lg btn--block", disabled: !@invitation.all_answered? %>
+  </section>
+</div>
 
 <script>
   (() => {
@@ -41,6 +51,7 @@
         return;
       }
       document.getElementById("preview").srcObject = stream;
+      document.getElementById("enable-devices").hidden = true;
       const [video] = stream.getVideoTracks();
       const [audio] = stream.getAudioTracks();
       status.textContent = `Camera and microphone ready (${video.label || "camera"}, ${audio.label || "microphone"}).`;

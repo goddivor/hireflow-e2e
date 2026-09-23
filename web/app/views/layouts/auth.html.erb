@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= [content_for(:title), current_organization&.name, "Hireflow"].compact.join(" · ") %></title>
+    <%= render "layouts/head" %>
+  </head>
+  <body>
+    <div class="auth">
+      <main class="auth__col">
+        <%= render "layouts/brand" %>
+        <%= yield %>
+        <ul class="auth__trust">
+          <li><span class="icon icon--sm icon--shield-check" aria-hidden="true"></span>Single-use links</li>
+          <li><span class="icon icon--sm icon--phone" aria-hidden="true"></span>Phone-verified candidates</li>
+          <li><span class="icon icon--sm icon--check-circle" aria-hidden="true"></span>One workspace per team</li>
+        </ul>
+      </main>
+      <aside class="auth__aside">
+        <span class="auth__aside-art" aria-hidden="true"></span>
+        <p class="auth__aside-title">Interviews that run while you sleep.</p>
+        <p class="auth__aside-text">Build a question set once, invite candidates by email, and review recorded answers when it suits your team.</p>
+      </aside>
+    </div>
+  </body>
+</html>

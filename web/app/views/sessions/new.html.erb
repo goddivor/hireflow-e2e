@@ -1,13 +1,26 @@
 <% content_for :title, "Sign in" %>
-<h1>Sign in to <%= current_organization.name %></h1>
-<%= form_with url: org_login_path, class: "stack" do |f| %>
-  <%= f.label :email, "Email" do %>Email <%= f.email_field :email, value: params[:email], required: true, autocomplete: "username" %><% end %>
-  <%= f.label :password, "Password" do %>Password <%= f.password_field :password, required: true, autocomplete: "current-password" %><% end %>
-  <%= f.submit "Sign in" %>
+<h1 class="t-h1 auth__title">Sign in to <%= current_organization.name %></h1>
+<p class="auth__sub">Recruiters and admins sign in here. Candidates use the link from their invitation email.</p>
+
+<%= form_with url: org_login_path, class: "auth__form" do |f| %>
+  <%= render "layouts/flash" %>
+  <div class="field">
+    <label class="field__label" for="email">Email</label>
+    <%= f.email_field :email, value: params[:email], required: true, autocomplete: "username", class: "input", placeholder: "you@company.com" %>
+  </div>
+  <div class="field">
+    <label class="field__label" for="password">Password</label>
+    <%= f.password_field :password, required: true, autocomplete: "current-password", class: "input", placeholder: "Your password" %>
+  </div>
+  <%= f.submit "Sign in", class: "btn btn--primary btn--lg btn--block" %>
 <% end %>
 
-<h2>No password?</h2>
-<%= form_with url: org_sign_in_link_path, class: "stack" do |f| %>
-  <%= f.label :email, for: "link_email" do %>Email for a sign-in link <%= f.email_field :email, id: "link_email", required: true %><% end %>
-  <%= f.submit "Email me a sign-in link", class: "secondary" %>
+<div class="auth__or"><span>or, without a password</span></div>
+
+<%= form_with url: org_sign_in_link_path, class: "auth__form auth__form--tight" do |f| %>
+  <div class="field">
+    <label class="field__label" for="link_email">Email for a sign-in link</label>
+    <%= f.email_field :email, id: "link_email", required: true, class: "input", placeholder: "you@company.com" %>
+  </div>
+  <%= f.submit "Email me a sign-in link", class: "btn btn--surface btn--lg btn--block" %>
 <% end %>

@@ -1,21 +1,26 @@
-<% if template.errors.any? %><div role="alert"><%= template.errors.full_messages.to_sentence %></div><% end %>
-<%= form_with model: template, url: url, class: "stack", id: "template-form" do |f| %>
-  <%= f.label :title do %>Title <%= f.text_field :title %><% end %>
-  <fieldset>
-    <legend>Questions</legend>
-    <ol id="questions">
-      <% (template.questions.presence || [""]).each_with_index do |question, i| %>
-        <li class="question-row">
-          <input name="interview_template[questions][]" value="<%= question %>" aria-label="Question <%= i + 1 %>">
-          <button type="button" class="secondary" data-action="up" aria-label="Move question <%= i + 1 %> up">↑</button>
-          <button type="button" class="secondary" data-action="remove" aria-label="Remove question <%= i + 1 %>">✕</button>
-        </li>
-      <% end %>
-    </ol>
-    <button type="button" class="secondary" id="add-question">Add question</button>
-  </fieldset>
-  <%= f.submit submit_label %>
-<% end %>
+<section class="card">
+  <%= form_with model: template, url: url, class: "form", id: "template-form" do |f| %>
+    <% if template.errors.any? %><div role="alert" class="flash flash--alert"><%= template.errors.full_messages.to_sentence %></div><% end %>
+    <div class="field">
+      <%= f.label :title, "Title", class: "field__label" %>
+      <%= f.text_field :title, class: "input", placeholder: "Senior Backend Engineer" %>
+    </div>
+    <fieldset class="fieldset">
+      <legend>Questions</legend>
+      <ol id="questions" class="questions">
+        <% (template.questions.presence || [""]).each_with_index do |question, i| %>
+          <li class="question-row">
+            <input class="input" name="interview_template[questions][]" value="<%= question %>" aria-label="Question <%= i + 1 %>">
+            <button type="button" class="btn btn--ghost btn--icon" data-action="up" aria-label="Move question <%= i + 1 %> up">↑</button>
+            <button type="button" class="btn btn--danger-ghost btn--icon" data-action="remove" aria-label="Remove question <%= i + 1 %>"><span class="icon icon--sm icon--close" aria-hidden="true"></span></button>
+          </li>
+        <% end %>
+      </ol>
+      <div><button type="button" class="btn btn--surface btn--sm" id="add-question"><span class="icon icon--sm icon--plus" aria-hidden="true"></span>Add question</button></div>
+    </fieldset>
+    <div><%= f.submit submit_label, class: "btn btn--primary" %></div>
+  <% end %>
+</section>
 
 <script>
   (() => {
@@ -37,11 +42,13 @@
     });
 
     list.addEventListener("click", (event) => {
-      const row = event.target.closest("li");
-      switch (event.target.dataset.action) {
-        case "up": if (row.previousElementSibling) list.insertBefore(row, row.previousElementSibling); break;
-        case "remove": if (list.children.length > 1) row.remove(); else row.querySelector("input").value = ""; break;
-        default: return;
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const row = button.closest("li");
+      if (button.dataset.action === "up" && row.previousElementSibling) list.insertBefore(row, row.previousElementSibling);
+      if (button.dataset.action === "remove") {
+        if (list.children.length > 1) row.remove();
+        else row.querySelector("input").value = "";
       }
       relabel();
     });

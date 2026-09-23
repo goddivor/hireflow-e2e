@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  layout "auth"
+
   TOO_MANY = -> { redirect_to org_login_path, alert: "Too many attempts. Try again in a minute." }
 
   # Per email against guessing one account's password, per IP against spraying many accounts.

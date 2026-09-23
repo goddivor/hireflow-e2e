@@ -1,4 +1,6 @@
 class PhoneVerificationsController < ApplicationController
+  layout "auth"
+
   before_action :set_pending_user
 
   def new

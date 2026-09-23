@@ -1,4 +1,6 @@
 class MagicLinksController < ApplicationController
+  layout "auth"
+
   SENT_NOTICE = "If that email belongs to an account, a sign-in link is on its way."
 
   def create

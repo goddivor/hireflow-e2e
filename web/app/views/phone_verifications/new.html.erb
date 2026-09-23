@@ -1,7 +1,12 @@
 <% content_for :title, "Confirm your phone" %>
-<h1>Confirm your phone</h1>
-<p>We texted a 6-digit code to the number ending in <strong><%= @pending_user.phone.last(4) %></strong>.</p>
-<%= form_with url: org_verify_phone_path, class: "stack" do |f| %>
-  <%= f.label :code do %>Code from the text message <%= f.text_field :code, inputmode: "numeric", autocomplete: "one-time-code", required: true %><% end %>
-  <%= f.submit "Confirm" %>
+<h1 class="t-h1 auth__title">Confirm your phone</h1>
+<p class="auth__sub">We texted a 6-digit code to the number ending in <strong class="t-mono"><%= @pending_user.phone.last(4) %></strong>.</p>
+<%= form_with url: org_verify_phone_path, class: "auth__form" do |f| %>
+  <%= render "layouts/flash" %>
+  <div class="field">
+    <label class="field__label" for="code">Code from the text message</label>
+    <%= f.text_field :code, inputmode: "numeric", autocomplete: "one-time-code", required: true, maxlength: 6, class: "input input--code", placeholder: "••••••" %>
+    <span class="field__hint">The code expires in 10 minutes.</span>
+  </div>
+  <%= f.submit "Confirm", class: "btn btn--primary btn--lg btn--block" %>
 <% end %>

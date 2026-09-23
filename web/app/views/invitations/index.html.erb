@@ -1,35 +1,48 @@
 <% content_for :title, "Invitations" %>
-<h1>Invitations</h1>
-<p><%= link_to "Invite a candidate", new_org_invitation_path, class: "button" %></p>
+<div class="page__head">
+  <div>
+    <h1 class="t-h1">Invitations</h1>
+    <p class="page__sub">Every candidate you invited, and how far they got.</p>
+  </div>
+  <%= link_to new_org_invitation_path, class: "btn btn--primary" do %><span class="icon icon--sm icon--plus" aria-hidden="true"></span>Invite a candidate<% end %>
+</div>
 
-<%= form_with url: org_invitations_path, method: :get, class: "toolbar", role: "search" do |f| %>
-  <%= hidden_field_tag :sort, @sort %>
-  <%= hidden_field_tag :direction, @direction %>
-  <%= f.label :q do %>Search candidates <%= f.search_field :q, value: params[:q] %><% end %>
-  <%= f.label :status do %>Status <%= f.select :status, [["All statuses", ""]] + Invitation::STATUSES.map { [_1.capitalize, _1] }, selected: params[:status] %><% end %>
-  <%= f.submit "Filter", name: nil %>
-<% end %>
+<div class="card card--flush">
+  <%= form_with url: org_invitations_path, method: :get, class: "toolbar", role: "search" do |f| %>
+    <%= hidden_field_tag :sort, @sort %>
+    <%= hidden_field_tag :direction, @direction %>
+    <div class="field">
+      <%= f.label :q, "Search candidates", class: "field__label" %>
+      <%= f.search_field :q, value: params[:q], class: "input", placeholder: "Name or email" %>
+    </div>
+    <div class="field">
+      <%= f.label :status, "Status", class: "field__label" %>
+      <%= f.select :status, [["All statuses", ""]] + Invitation::STATUSES.map { [_1.capitalize, _1] }, { selected: params[:status] }, class: "input" %>
+    </div>
+    <%= f.button "Filter", name: nil, class: "btn btn--ink" %>
+  <% end %>
 
-<table aria-label="Invitations">
-  <thead>
-    <tr>
-      <%= sortable_header "Candidate", "candidate" %>
-      <th scope="col">Email</th>
-      <%= sortable_header "Template", "template" %>
-      <%= sortable_header "Status", "status" %>
-      <%= sortable_header "Sent", "sent" %>
-    </tr>
-  </thead>
-  <tbody>
-    <% @invitations.each do |invitation| %>
+  <table class="table" aria-label="Invitations">
+    <thead>
       <tr>
-        <td><%= invitation.candidate.name %></td>
-        <td><%= invitation.candidate.email %></td>
-        <td><%= invitation.interview_template.title %></td>
-        <td><%= invitation.status.capitalize %></td>
-        <td><time datetime="<%= invitation.created_at.iso8601 %>"><%= invitation.created_at.to_fs(:short) %></time></td>
+        <%= sortable_header "Candidate", "candidate" %>
+        <th scope="col">Email</th>
+        <%= sortable_header "Template", "template" %>
+        <%= sortable_header "Status", "status" %>
+        <%= sortable_header "Sent", "sent" %>
       </tr>
-    <% end %>
-  </tbody>
-</table>
-<% if @invitations.empty? %><p>No invitations match.</p><% end %>
+    </thead>
+    <tbody>
+      <% @invitations.each do |invitation| %>
+        <tr>
+          <td class="strong"><%= invitation.candidate.name %></td>
+          <td><%= invitation.candidate.email %></td>
+          <td><%= invitation.interview_template.title %></td>
+          <td><%= status_badge(invitation.status) %></td>
+          <td class="t-mono muted"><time datetime="<%= invitation.created_at.iso8601 %>"><%= invitation.created_at.to_fs(:short) %></time></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <% if @invitations.empty? %><div class="empty"><span class="empty__art" aria-hidden="true"></span><p>No invitations match.</p></div><% end %>
+</div>
