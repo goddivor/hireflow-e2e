@@ -130,11 +130,3 @@ Two problems met there, both fixed in the history:
 
 **Rails.**
 The seed controller [`web/app/controllers/test_support/seeds_controller.rb`](web/app/controllers/test_support/seeds_controller.rb), the factories in [`web/spec/factories/`](web/spec/factories), and the specs [`web/spec/requests/test_support/seeds_spec.rb`](web/spec/requests/test_support/seeds_spec.rb) and [`web/spec/requests/invitations_spec.rb`](web/spec/requests/invitations_spec.rb).
-
-## 🤝 Contributing
-
-Issues and pull requests are welcome. Keep one concern per commit, use conventional commit messages in English (`test(e2e): ...`, `fix(web): ...`), and run the suite with `--repeat-each` before calling a new test stable. A test that exposes an app bug may change the app and the test in one commit; the message says what the cause was.
-
-## 📜 License
-
-Released under the [MIT License](LICENSE).
