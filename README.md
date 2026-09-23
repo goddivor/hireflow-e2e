@@ -59,7 +59,7 @@ Each runner starts its own stack (Rails in UAT mode, Mailpit, SMS sink) and runs
 | Problems met there | One shared account let tests see each other's data: [`3161ab5`](https://github.com/goddivor/hireflow-e2e/commit/3161ab5) → [`4813841`](https://github.com/goddivor/hireflow-e2e/commit/4813841). Parallel sign-ins tripped the per-IP rate limit: [`7bc3569`](https://github.com/goddivor/hireflow-e2e/commit/7bc3569), [`4fb81de`](https://github.com/goddivor/hireflow-e2e/commit/4fb81de) |
 | Flaky test fixes | Recorder announced "Recording…" too early, 16/20 failures: [`9a81206`](https://github.com/goddivor/hireflow-e2e/commit/9a81206). Email job ran before the transaction committed, 2/5 failures: [`7a30a4b`](https://github.com/goddivor/hireflow-e2e/commit/7a30a4b) |
 | Email and SMS test | [`invite-candidate.spec.ts`](e2e/tests/invitations/invite-candidate.spec.ts): reads the email, follows the link, enters the texted code |
-| CI runs | [Actions](https://github.com/goddivor/hireflow-e2e/actions/workflows/e2e.yml): test count, runtime and runners in each run summary |
+| CI runs | [A green run](https://github.com/goddivor/hireflow-e2e/actions/runs/35809339130): 32 tests on 4 parallel runners, count and runtime in its summary. [All runs](https://github.com/goddivor/hireflow-e2e/actions/workflows/e2e.yml) |
 | Rails | [Seed controller](web/app/controllers/test_support/seeds_controller.rb), [factories](web/spec/factories), [seed specs](web/spec/requests/test_support/seeds_spec.rb) |
 
 ## 📦 Installation
