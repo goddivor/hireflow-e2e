@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-E2E_VIDEO=on E2E_SLOWMO="${E2E_SLOWMO:-350}" npx playwright test e2e/tests/journeys --workers=1 --retries=0
+E2E_VIDEO=on E2E_SLOWMO="${E2E_SLOWMO:-1000}" npx playwright test e2e/tests/journeys --workers=1 --retries=0 --timeout=180000
 
 dir=$(ls -d test-results/journeys-*/ | head -1)
 recruiter=$(ls "$dir"video-1-recruiter/*.webm)
@@ -16,7 +16,7 @@ recruiter_length=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$
 last_check=$(node -e 'console.log(Math.max(0, process.argv[1] - 2.5).toFixed(2))' "$recruiter_length")
 
 palette="fps=8,scale=960:-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle"
-hold="tpad=stop_mode=clone:stop_duration=2.5"
+hold="tpad=stop_mode=clone:stop_duration=4"
 
 mkdir -p media
 ffmpeg -y -loglevel error -i "$recruiter" -filter_complex "
