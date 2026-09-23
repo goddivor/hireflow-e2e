@@ -8,7 +8,11 @@ FactoryBot.define do
 
     organization
     interview_template { association :interview_template, organization:, **{ title: template_title }.compact }
-    candidate { association :user, :candidate, organization:, **{ name: candidate_name, email: candidate_email }.compact }
+    # An existing candidate is reused, so a test can hand an interview to its signed-in candidate.
+    candidate do
+      organization.users.find_by(email: candidate_email) ||
+        association(:user, :candidate, organization:, **{ name: candidate_name, email: candidate_email }.compact)
+    end
     invited_by { association :user, :recruiter, organization: }
     status { "pending" }
 
