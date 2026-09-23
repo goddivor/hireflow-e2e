@@ -16,7 +16,7 @@ test.describe("taking an interview", () => {
     await expect(page.getByRole("button", { name: "Submit interview" })).toBeDisabled();
 
     await page.getByRole("button", { name: "Turn on camera and microphone" }).click();
-    await expect(page.locator("#device-status")).toHaveText(/^Camera and microphone ready \(fake_device_0.*\)\.$/);
+    await expect(page.getByRole("status", { name: "Device status" })).toHaveText(/^Camera and microphone ready \(fake_device_0.*\)\.$/);
     // The fake camera paints real frames: the preview has a size only once video is flowing.
     await expect.poll(() => page.getByLabel("Camera preview").evaluate((video: HTMLVideoElement) => video.videoWidth)).toBeGreaterThan(0);
 

@@ -51,15 +51,17 @@ test.describe("invitations table", () => {
     await page.goto(org(`/invitations?q=${encodeURIComponent(tag)}`));
     const table = page.getByRole("table", { name: "Invitations" });
     const candidateHeader = table.getByRole("columnheader", { name: "Candidate" });
-    const firstColumn = table.locator("tbody tr td:first-child");
+    // Rows of the body only: the header row is the table's first rowgroup.
+    const bodyRows = table.getByRole("rowgroup").last().getByRole("row");
+    const startsWith = (names: string[]) => names.map((name) => new RegExp(`^\\s*${name}\\b`));
 
     await candidateHeader.getByRole("link").click();
     await expect(candidateHeader).toHaveAttribute("aria-sort", "ascending");
-    await expect(firstColumn).toHaveText([`${tag} Avery`, `${tag} Blake`, `${tag} Cameron`]);
+    await expect(bodyRows).toHaveText(startsWith([`${tag} Avery`, `${tag} Blake`, `${tag} Cameron`]));
 
     await candidateHeader.getByRole("link").click();
     await expect(candidateHeader).toHaveAttribute("aria-sort", "descending");
-    await expect(firstColumn).toHaveText([`${tag} Cameron`, `${tag} Blake`, `${tag} Avery`]);
+    await expect(bodyRows).toHaveText(startsWith([`${tag} Cameron`, `${tag} Blake`, `${tag} Avery`]));
   });
 
   test("shows only this tenant's invitations", async ({ page, org, seed }) => {
